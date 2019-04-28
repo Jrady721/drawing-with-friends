@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox prefHeight="450.0" prefWidth="400.0" spacing="10.0" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.Controller">
+   <children>
+        <Label fx:id="lblTitle" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="LOGIN" textAlignment="CENTER">
+         <VBox.margin>
+            <Insets />
+         </VBox.margin>
+      </Label>
+        <Label fx:id="lblUserName" text="아이디" />
+        <TextField fx:id="txtUserName" onAction="#Login" promptText="UserName" />
+        <Label fx:id="lblPassword" text="비밀번호" />
+      <PasswordField fx:id="txtPassword" onAction="#Login" promptText="Password" />
+        <Button fx:id="btnLogin" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#Login" text="로그인">
+         <VBox.margin>
+            <Insets top="30.0" />
+         </VBox.margin></Button>
+        <Button fx:id="btnRegister" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="회원가입" />
+        <Button fx:id="btnGuest" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="게스트" />
+   </children>
+   <padding>
+      <Insets bottom="60.0" left="70.0" right="70.0" top="40.0" />
+   </padding>
+</VBox>

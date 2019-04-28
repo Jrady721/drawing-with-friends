@@ -1,0 +1,18 @@
+/* root */
+.root { -fx-background-color: white; -fx-font-family: "Malgun Gothic", sans-serif; }
+
+/* label */
+.label { -fx-text-alignment: center; }
+#lblTitle { -fx-font-weight: bold; -fx-font-size: 18; -fx-padding: 0 0 20 0; }
+
+/* text field */
+.text-field { -fx-background-color: rgb(240, 240, 240); -fx-padding: 10; }
+
+/* password filed */
+.password-field { -fx-background-color: rgb(240, 240, 240); -fx-padding: 10; }
+
+/* button */
+.button { -fx-background-color: #52bda0; -fx-text-fill: white; -fx-cursor: hand; -fx-padding: 10; -fx-spacing: 10;}
+.button:hover { -fx-background-color: #4a9d8c; }
+
+.button:pressed, .button:default:hover:pressed { -fx-background-color: #488c7e; }
