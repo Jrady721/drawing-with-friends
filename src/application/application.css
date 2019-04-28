@@ -1,9 +1,13 @@
 /* root */
-.root { -fx-background-color: white; -fx-font-family: "Malgun Gothic", sans-serif; }
+.root { -fx-background-color: white; -fx-font-family: "Malgun Gothic", sans-serif; -fx-padding: 40 70 60 70; -fx-spacing: 10; -fx-min-width: 400;  -fx-min-height: 450; }
+
+/* layout */
+#main { -fx-padding: 100 70 100 70;}
+#main .button { -fx-min-height: 125; -fx-font-family: "Malgun Gothic",sans-serif; -fx-font-weight: bold; -fx-font-size: 20; }
 
 /* label */
-.label { -fx-text-alignment: center; }
-#lblTitle { -fx-font-weight: bold; -fx-font-size: 18; -fx-padding: 0 0 20 0; }
+.label { -fx-text-alignment: center; -fx-max-width: infinity; }
+.title { -fx-font-weight: bold; -fx-font-size: 18; -fx-padding: 0 0 20 0; -fx-alignment: center; }
 
 /* text field */
 .text-field { -fx-background-color: rgb(240, 240, 240); -fx-padding: 10; }
@@ -12,7 +16,7 @@
 .password-field { -fx-background-color: rgb(240, 240, 240); -fx-padding: 10; }
 
 /* button */
-.button { -fx-background-color: #52bda0; -fx-text-fill: white; -fx-cursor: hand; -fx-padding: 10; -fx-spacing: 10;}
-.button:hover { -fx-background-color: #4a9d8c; }
+.button { -fx-background-color: #54c6ad; -fx-text-fill: white; -fx-cursor: hand; -fx-max-width: infinity; -fx-padding: 10; -fx-spacing: 10; -fx-font-weight: bold; }
+.button:hover { -fx-background-color: #54baa9; }
 
-.button:pressed, .button:default:hover:pressed { -fx-background-color: #488c7e; }
+.button:pressed, .button:default:hover:pressed { -fx-background-color: #55a89e; }
