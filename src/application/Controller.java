@@ -70,6 +70,10 @@ public class Controller {
     @FXML
     private Button btnLogin;
 
+//    public void moveMain() throws Exception {
+//        Move("main", "메인", btnLogin);
+//    }
+
     // login
     public void Login(ActionEvent event) throws Exception {
         String username = txtUserName.getText();
@@ -96,7 +100,17 @@ public class Controller {
 
     @FXML
     private Button btnMoveLogin;
-    public void moveLogin() throws  Exception {
+    public void moveLogin() throws Exception {
         Move("login", "로그인", btnMoveLogin);
+    }
+
+    @FXML Button btnMoveGallery;
+    public void moveGallery() throws Exception {
+        Move("gallery", "갤러리", btnMoveGallery);
+    }
+
+    @FXML Button btnMoveDraw;
+    public void moveDraw() throws Exception {
+        Move("draw", "그림 그리기", btnMoveDraw);
     }
 }

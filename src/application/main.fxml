@@ -3,10 +3,9 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox id="main" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="application.Controller">
+<VBox id="main" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.Controller">
     <children>
-        <Button mnemonicParsing="false" text="그림 그리기"/>
-        <Button mnemonicParsing="false" text="갤러리"/>
+        <Button fx:id="btnMoveDraw" mnemonicParsing="false" onAction="#moveDraw" text="그림 그리기" />
+        <Button fx:id="btnMoveGallery" mnemonicParsing="false" onAction="#moveGallery" text="갤러리" />
     </children>
 </VBox>
