@@ -11,7 +11,7 @@ public class UserDAO {
     // SELECT a User
     public static User searchUser(String userId) throws SQLException, ClassNotFoundException {
         // Declare a SELECT statement
-        String selectStmt = "SELECT * FROM users WHERE id = " + userId;
+        String selectStmt = "SELECT * FROM users WHERE id = '" + userId + "'";
 
         // Execute SELECT statement
         try {

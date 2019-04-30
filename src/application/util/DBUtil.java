@@ -26,7 +26,7 @@ public class DBUtil {
 
         // 연결
         try {
-            conn = DriverManager.getConnection(JDBC_URL);
+            conn = DriverManager.getConnection(JDBC_URL, "root", "");
         } catch (SQLException e) {
             System.out.println("Connection Failed! Check output console" + e);
             e.printStackTrace();
@@ -60,6 +60,14 @@ public class DBUtil {
             // Create statement
             stmt = conn.createStatement();
 
+            // Execute select (query) operation
+            resultSet = stmt.executeQuery(queryStmt);
+
+            // CachedRowSet Implementation
+            // In order to prevent "java.sql.SQLRecoverableException: Closed Connection: next" error
+            // We are using CachedRowSet
+            crs = new CachedRowSetImpl();
+            crs.populate(resultSet);
         } catch (SQLException e) {
             System.out.println("Problem occurred at executeQuery operation : " + e);
             throw e;
