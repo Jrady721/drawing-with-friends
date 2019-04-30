@@ -5,13 +5,9 @@ import application.model.UserDAO;
 import application.util.Util;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
-import javafx.stage.Stage;
 
 public class LoginController {
     @FXML
@@ -66,5 +62,14 @@ public class LoginController {
     // 회원가입 페이지로 이동
     public void moveRegister() throws Exception {
         Util.Move("register", "회원가입", btnMoveRegister);
+    }
+
+    // 로그인 페이지 -> 드로우 페이지 이동 버튼
+    @FXML
+    private Button btnMoveDraw;
+
+    // 드로우 페이지로 이동
+    public void moveDraw() throws Exception {
+        Util.Move("draw", "게스트", btnMoveDraw);
     }
 }

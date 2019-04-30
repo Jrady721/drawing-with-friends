@@ -7,24 +7,23 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="application.controller.LoginController">
+<VBox xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.controller.LoginController">
     <children>
         <Label fx:id="lblTitle" styleClass="title" text="로그인">
             <VBox.margin>
-                <Insets/>
+                <Insets />
             </VBox.margin>
         </Label>
-        <Label fx:id="lblUserName" text="아이디"/>
-        <TextField fx:id="txtUserName" onAction="#Login" promptText="UserName"/>
-        <Label fx:id="lblPassword" text="비밀번호"/>
-        <PasswordField fx:id="txtPassword" onAction="#Login" promptText="Password"/>
+        <Label fx:id="lblUserName" text="아이디" />
+        <TextField fx:id="txtUserName" onAction="#Login" promptText="UserName" />
+        <Label fx:id="lblPassword" text="비밀번호" />
+        <PasswordField fx:id="txtPassword" onAction="#Login" promptText="Password" />
         <Button fx:id="btnLogin" mnemonicParsing="false" onAction="#Login" text="로그인">
             <VBox.margin>
-                <Insets top="30.0"/>
+                <Insets top="30.0" />
             </VBox.margin>
         </Button>
-        <Button fx:id="btnMoveRegister" mnemonicParsing="false" onAction="#moveRegister" text="회원가입"/>
-        <Button fx:id="btnGuest" mnemonicParsing="false" text="게스트"/>
+        <Button fx:id="btnMoveRegister" mnemonicParsing="false" onAction="#moveRegister" text="회원가입" />
+        <Button fx:id="btnMoveDraw" mnemonicParsing="false" onAction="#moveDraw" text="게스트" />
     </children>
 </VBox>

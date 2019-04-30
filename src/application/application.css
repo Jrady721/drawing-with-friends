@@ -2,8 +2,14 @@
 .root { -fx-background-color: white; -fx-font-family: "Malgun Gothic", sans-serif; -fx-padding: 40 70 60 70; -fx-spacing: 10; -fx-min-width: 400;  -fx-min-height: 450; }
 
 /* layout */
-#main { -fx-padding: 100 70 100 70;}
+#main { -fx-padding: 0; -fx-spacing: 0; }
+#main .container { -fx-padding: 90 70 100 70; -fx-spacing: 10;}
 #main .button { -fx-min-height: 125; -fx-font-family: "Malgun Gothic",sans-serif; -fx-font-weight: bold; -fx-font-size: 20; }
+
+/* btn-logout */
+#btn-logout { -fx-cursor: hand; -fx-padding: 0 10 0 0; }
+#btn-logout:hover { -fx-text-fill: #52bda0; }
+
 
 /* label */
 .label { -fx-text-alignment: center; -fx-max-width: infinity; }
@@ -20,3 +26,4 @@
 .button:hover { -fx-background-color: #54baa9; }
 
 .button:pressed, .button:default:hover:pressed { -fx-background-color: #55a89e; }
+
