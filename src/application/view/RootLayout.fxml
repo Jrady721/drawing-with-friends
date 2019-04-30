@@ -3,21 +3,22 @@
 <?import javafx.scene.layout.BorderPane?>
 
 
-<BorderPane xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.controller.RootLayoutController">
-<!--    <top>-->
-<!--        <MenuBar BorderPane.alignment="CENTER" styleClass="menu-bar">-->
-<!--            <menus>-->
-<!--                <Menu mnemonicParsing="false" text="파일">-->
-<!--                    <items>-->
-<!--                        <MenuItem mnemonicParsing="false" text="프로그램 닫기" onAction="#handleExit"/>-->
-<!--                    </items>-->
-<!--                </Menu>-->
-<!--                <Menu mnemonicParsing="false" text="도움말">-->
-<!--                    <items>-->
-<!--                        <MenuItem mnemonicParsing="false" text="프로그램 정보" onAction="#handleHelp"/>-->
-<!--                    </items>-->
-<!--                </Menu>-->
-<!--            </menus>-->
-<!--        </MenuBar>-->
-<!--    </top>-->
+<BorderPane xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="application.controller.RootLayoutController">
+    <!--    <top>-->
+    <!--        <MenuBar BorderPane.alignment="CENTER" styleClass="menu-bar">-->
+    <!--            <menus>-->
+    <!--                <Menu mnemonicParsing="false" text="파일">-->
+    <!--                    <items>-->
+    <!--                        <MenuItem mnemonicParsing="false" text="프로그램 닫기" onAction="#handleExit"/>-->
+    <!--                    </items>-->
+    <!--                </Menu>-->
+    <!--                <Menu mnemonicParsing="false" text="도움말">-->
+    <!--                    <items>-->
+    <!--                        <MenuItem mnemonicParsing="false" text="프로그램 정보" onAction="#handleHelp"/>-->
+    <!--                    </items>-->
+    <!--                </Menu>-->
+    <!--            </menus>-->
+    <!--        </MenuBar>-->
+    <!--    </top>-->
 </BorderPane>

@@ -11,8 +11,8 @@
                maxWidth="1.7976931348623157E308" onMouseClicked="#Logout" text="로그아웃"/>
         <VBox prefHeight="200.0" prefWidth="100.0" styleClass="container">
             <children>
-                <Button fx:id="btnMoveDraw" mnemonicParsing="false" onAction="#moveDraw" text="그림 그리기"/>
-                <Button fx:id="btnMoveGallery" mnemonicParsing="false" onAction="#moveGallery" text="갤러리"/>
+                <Button mnemonicParsing="false" onAction="#moveDraw" text="그림 그리기"/>
+                <Button mnemonicParsing="false" onAction="#moveGallery" text="갤러리"/>
             </children>
         </VBox>
     </children>

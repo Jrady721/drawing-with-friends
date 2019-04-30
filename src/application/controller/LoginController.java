@@ -109,23 +109,26 @@ public class LoginController {
 
     @FXML
     public void Login(ActionEvent event) throws Exception {
-        String username = loginUserName.getText();
+        String userName = loginUserName.getText();
         String password = loginPassword.getText();
 
-        if (username.equals("") || password.equals("")) {
+        if (userName.equals("") || password.equals("")) {
             Util.Alert("알림", "로그인 실패", "폼을 정확히 채워주세요.", Alert.AlertType.WARNING);
         } else {
-            System.out.println("회원 아이디: " + username);
+            System.out.println("회원 아이디: " + userName);
 
-            User user = UserDAO.searchUser(username);
+            User user = UserDAO.searchUser(userName);
             // user 가 빈 값이 아니면
             if (user != null) {
                 // 아이디와 패스워드 일치
                 if (password.equals(user.getPassword())) {
-                    // 알림 띄우기
-                    Util.Alert("알림", "로그인 성공", "메인 페이지로 이동합니다.", Alert.AlertType.INFORMATION);
+                    // 로그인 세션
+                    Main.loginSession = true;
 
-                    Util.Move("Home", "홈 화면");
+                    // 알림 띄우기
+                    Util.Alert("알림", "로그인 성공", userName+"님 환영합니다. 홈 화면으로 이동합니다.", Alert.AlertType.INFORMATION);
+
+                    Util.Move("Home");
                 } else {
                     // 알림 띄우기
                     Util.Alert("알림", "로그인 실패", "비밀번호가 틀렸습니다.", Alert.AlertType.WARNING);
@@ -137,14 +140,16 @@ public class LoginController {
         }
     }
 
+    // Register 페이지로 이동
     @FXML
-    public void MoveRegister() {
-
+    public void MoveRegister() throws Exception {
+        Util.Move("Register");
     }
 
+    // Draw 페이지로 이동 (게스트)
     @FXML
-    public void MoveDraw() {
-
+    public void MoveDraw() throws Exception {
+        Util.Move("Draw");
     }
 
     /**

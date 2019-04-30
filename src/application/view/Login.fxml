@@ -19,12 +19,12 @@
         <TextField fx:id="loginUserName" onAction="#Login" promptText="UserName"/>
         <Label fx:id="lblPassword" text="비밀번호"/>
         <PasswordField fx:id="loginPassword" onAction="#Login" promptText="Password"/>
-        <Button fx:id="btnLogin" mnemonicParsing="false" onAction="#Login" text="로그인">
+        <Button mnemonicParsing="false" onAction="#Login" text="로그인">
             <VBox.margin>
                 <Insets top="30.0"/>
             </VBox.margin>
         </Button>
-        <Button fx:id="btnMoveRegister" mnemonicParsing="false" onAction="#MoveRegister" text="회원가입"/>
-        <Button fx:id="btnMoveDraw" mnemonicParsing="false" onAction="#MoveDraw" text="게스트"/>
+        <Button mnemonicParsing="false" onAction="#MoveRegister" text="회원가입"/>
+        <Button mnemonicParsing="false" onAction="#MoveDraw" text="게스트"/>
     </children>
 </VBox>

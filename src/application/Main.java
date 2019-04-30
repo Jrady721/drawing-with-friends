@@ -15,7 +15,9 @@ import java.io.IOException;
 
 public class Main extends Application {
     public static Stage primaryStage;
-    private BorderPane rootLayout;
+    public static BorderPane rootLayout;
+    public static Boolean loginSession = false;
+    public static Boolean isOpenDraw = false;
 
     // 회원에 대한 observable 리스트
     private ObservableList<User> userList = FXCollections.observableArrayList();
@@ -59,7 +61,7 @@ public class Main extends Application {
             scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
 
             primaryStage.setScene(scene);
-            primaryStage.setTitle("로그인 화면");
+            primaryStage.setTitle("Login");
             primaryStage.setResizable(false);
             primaryStage.show();
         } catch (IOException e) {
