@@ -9,9 +9,9 @@ import java.sql.SQLException;
 
 public class UserDAO {
     // SELECT a User
-    public static User searchUser(String userId) throws SQLException, ClassNotFoundException {
+    public static User searchUser(String userName) throws SQLException, ClassNotFoundException {
         // Declare a SELECT statement
-        String selectStmt = "SELECT * FROM users WHERE id = '" + userId + "'";
+        String selectStmt = "SELECT * FROM users WHERE username = '" + userName + "'";
 
         // Execute SELECT statement
         try {
@@ -24,7 +24,7 @@ public class UserDAO {
             // Return user object
             return user;
         } catch (SQLException e) {
-            System.out.println("While searching a user with " + userId + " id, an error occurred: " + e);
+            System.out.println("While searching a user with " + userName + " username, an error occurred: " + e);
             // Return exception
             throw e;
         }
@@ -35,9 +35,9 @@ public class UserDAO {
         User user = null;
         if (rs.next()) {
             user = new User();
-            user.setUserIdx(rs.getInt("IDX"));
-            user.setUserId(rs.getString("ID"));
-            user.setUserPassword(rs.getString("PASSWORD"));
+            user.setId(rs.getInt("ID"));
+            user.setUserName(rs.getString("USERNAME"));
+            user.setPassword(rs.getString("PASSWORD"));
         }
         return user;
     }
@@ -71,9 +71,9 @@ public class UserDAO {
 
         while (rs.next()) {
             User user = new User();
-            user.setUserIdx(rs.getInt("IDX"));
-            user.setUserId(rs.getString("ID"));
-            user.setUserPassword(rs.getString("PASSWORD"));
+            user.setId(rs.getInt("ID"));
+            user.setUserName(rs.getString("USERNAME"));
+            user.setPassword(rs.getString("PASSWORD"));
 
             // Add user to the ObservableList
             userList.add(user);
@@ -86,7 +86,7 @@ public class UserDAO {
     // INSERT a user
     public static void insertUser(String id, String password) throws SQLException, ClassNotFoundException {
         // Declare a INSERT statement
-        String insertStmt = "INSERT INTO users (id, password) VALUES('" + id + "', '" + password + "')";
+        String insertStmt = "INSERT INTO users (username, password) VALUES('" + id + "', '" + password + "')";
 
         // Execute INSERT operation
         try {

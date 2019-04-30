@@ -9,79 +9,77 @@ public class DBUtil {
     private static final String JDBC_DRIVER = "org.mariadb.jdbc.Driver";
     // JDBC URL
     private static final String JDBC_URL = "jdbc:mariadb://localhost:3306/drawing_with_friends";
+    // DB USERNAME
+    private static final String DB_USERNAME = "root";
+    // DB PASSWORD
+    private static final String DB_PASSWORD = "";
     // Connection
     private static Connection conn = null;
 
-    // DB Connect
+    // DB 연결
     public static void dbConnect() throws SQLException, ClassNotFoundException {
         try {
             Class.forName(JDBC_DRIVER);
         } catch (ClassNotFoundException e) {
-            System.out.println("Where is your MariaDB JDBC Driver?");
+            System.out.println("MariaDB JDBC Driver 를 확인해주세요.");
             e.printStackTrace();
             throw e;
         }
 
-        System.out.println("MariaDB JDBC Driver Registered!");
+        System.out.println("MariaDB JDBC Driver 가 등록되었습니다.");
 
         // 연결
         try {
-            conn = DriverManager.getConnection(JDBC_URL, "root", "");
+            conn = DriverManager.getConnection(JDBC_URL, DB_USERNAME, DB_PASSWORD);
         } catch (SQLException e) {
-            System.out.println("Connection Failed! Check output console" + e);
+            System.out.println("연결에 실패했습니다! 콘솔 출력 내용을 확인해주세요: " + e);
             e.printStackTrace();
             throw e;
         }
     }
 
-    // DB Close Connection
+    // DB 연결 해제
     public static void dbDisconnect() throws SQLException {
-        try {
-            if (conn != null && !conn.isClosed()) {
-                conn.close();
-            }
-        } catch (SQLException e) {
-            throw e;
+        if (conn != null && !conn.isClosed()) {
+            conn.close();
         }
     }
 
-    // DB Execute Query Operation
+    // DB (select)
     public static ResultSet dbExecuteQuery(String queryStmt) throws SQLException, ClassNotFoundException {
         Statement stmt = null;
         ResultSet resultSet = null;
         CachedRowSetImpl crs = null;
 
         try {
-            // Connect to DB
+            // DB 연결
             dbConnect();
 
             System.out.println("Select statement: " + queryStmt + "\n");
 
-            // Create statement
+            // statement 생성
             stmt = conn.createStatement();
 
-            // Execute select (query) operation
+            // 쿼리 실행
             resultSet = stmt.executeQuery(queryStmt);
 
-            // CachedRowSet Implementation
-            // In order to prevent "java.sql.SQLRecoverableException: Closed Connection: next" error
-            // We are using CachedRowSet
+            // CachedRowSet 는 "java.sql.SQLRecoverableException: Closed Connection: next" 오류를 방지할 수 있다.
             crs = new CachedRowSetImpl();
             crs.populate(resultSet);
         } catch (SQLException e) {
-            System.out.println("Problem occurred at executeQuery operation : " + e);
+            System.out.println("dbExecuteQuery 작업에서 문제가 발생했습니다. : " + e);
             throw e;
         } finally {
             if (resultSet != null) {
-                // Close resultSet
+                // resultSet 닫기
                 resultSet.close();
             }
             if (stmt != null) {
-                // Close Statement
+                // Statement 닫기
                 stmt.close();
             }
 
-            // Close connection
+            // 연결 해제
             dbDisconnect();
         }
 
@@ -89,26 +87,26 @@ public class DBUtil {
         return crs;
     }
 
-    // DB Execute Update (For Update/Insert/Delete) Operation
+    // (Update/Insert/Delete)
     public static void dbExecuteUpdate(String sqlStmt) throws SQLException, ClassNotFoundException {
         // Declare statement as null
         Statement stmt = null;
         try {
-            // Connect to DB
+            // DB 연결
             dbConnect();
-            // Create Statement
+            // Statement 생성
             stmt = conn.createStatement();
-            // Run executeUpdate operation with given sql statement
+            // 실행
             stmt.executeUpdate(sqlStmt);
         } catch (SQLException e) {
-            System.out.println("Problem occurred at executeUpdate operation : " + e);
+            System.out.println("dbExecuteUpdate 작업에서 문제가 발생했습니다. : " + e);
             throw e;
         } finally {
-            // Close Statement
+            // Statement 닫기
             if (stmt != null) {
                 stmt.close();
             }
-            // Close connection
+            // 연결 해제
             dbDisconnect();
         }
     }

@@ -1,4 +1,4 @@
-package application.controller;
-
-public class GalleryController {
-}
+//package application.controller;
+//
+//public class GalleryController {
+//}
