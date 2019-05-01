@@ -1,15 +1,13 @@
 package application.controller;
 
 import application.util.Util;
-import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
-
 import javafx.event.ActionEvent;
-import javafx.scene.layout.VBox;
+import javafx.scene.control.Alert;
 
 public class RootLayoutController {
     // 프로그램 종료
     public void handleExit(ActionEvent actionEvent) {
+        System.out.println("프로그램 종료");
         System.exit(0);
     }
 

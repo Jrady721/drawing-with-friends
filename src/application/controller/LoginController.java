@@ -126,7 +126,16 @@ public class LoginController {
                     Main.loginSession = true;
 
                     // 알림 띄우기
-                    Util.Alert("알림", "로그인 성공", userName+"님 환영합니다. 홈 화면으로 이동합니다.", Alert.AlertType.INFORMATION);
+                    Util.Alert("알림", "로그인 성공", userName + "님 환영합니다. 홈 화면으로 이동합니다.", Alert.AlertType.INFORMATION);
+
+                    if (Util.drawStage != null) {
+                        if (Util.drawStage.isShowing()) {
+
+                            Util.Alert("알림", "Draw 창 종료", "로그인 하여 'Draw'(게스트) 창이 종료됩니다.", Alert.AlertType.INFORMATION);
+                            // 닫기
+                            Util.drawStage.close();
+                        }
+                    }
 
                     Util.Move("Home");
                 } else {

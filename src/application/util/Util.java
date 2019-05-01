@@ -1,12 +1,10 @@
 package application.util;
 
 import application.Main;
-import application.controller.LoginController;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.scene.Cursor;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -16,6 +14,7 @@ import javafx.scene.image.WritableImage;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.scene.shape.*;
 import javafx.scene.text.Font;
 import javafx.stage.FileChooser;
@@ -30,6 +29,10 @@ import java.io.InputStream;
 import java.util.Stack;
 
 public class Util {
+    private static File file = null;
+
+    public static Stage drawStage;
+
     // 알림창
     public static void Alert(String title, String HeaderText, String ContentText, Alert.AlertType type) {
         Alert alert = new Alert(type);
@@ -62,109 +65,161 @@ public class Util {
         if (pageName.equals("Draw")) {
             if (!Main.isOpenDraw) {
                 Main.isOpenDraw = true;
+                drawStage = new Stage();
 
-                Stage primaryStage = new Stage();
-
+                // 히스토리 저장
                 Stack<Shape> undoHistory = new Stack();
                 Stack<Shape> redoHistory = new Stack();
 
-                /* ----------btns---------- */
-                ToggleButton drowbtn = new ToggleButton("Draw");
-                ToggleButton rubberbtn = new ToggleButton("Rubber");
-                ToggleButton linebtn = new ToggleButton("Line");
-                ToggleButton rectbtn = new ToggleButton("Rectange");
-                ToggleButton circlebtn = new ToggleButton("Circle");
-                ToggleButton elpslebtn = new ToggleButton("Ellipse");
-                ToggleButton textbtn = new ToggleButton("Text");
+                /* 버튼 들 */
+                ToggleButton btnPen = new ToggleButton("펜");
+                ToggleButton btnEraser = new ToggleButton("지우개");
+                ToggleButton btnLine = new ToggleButton("선");
+                ToggleButton btnRect = new ToggleButton("사각형");
+                ToggleButton btnCircle = new ToggleButton("원");
+                ToggleButton btnEllipse = new ToggleButton("타원");
+                ToggleButton btnText = new ToggleButton("텍스트");
 
-                ToggleButton[] toolsArr = {drowbtn, rubberbtn, linebtn, rectbtn, circlebtn, elpslebtn, textbtn};
+                // 기본으로 Pen 버튼을 선택한다.
+                btnPen.setSelected(true);
 
+                // 버튼 목록
+                ToggleButton[] toolsArr = {btnPen, btnEraser, btnLine, btnRect, btnCircle, btnEllipse, btnText};
                 ToggleGroup tools = new ToggleGroup();
 
+                // toggle group 에 버튼 붙이기 & 기본 설정
                 for (ToggleButton tool : toolsArr) {
                     tool.setMinWidth(90);
                     tool.setToggleGroup(tools);
                     tool.setCursor(Cursor.HAND);
                 }
 
+                // 색 지정
                 ColorPicker cpLine = new ColorPicker(Color.BLACK);
                 ColorPicker cpFill = new ColorPicker(Color.TRANSPARENT);
 
                 TextArea text = new TextArea();
                 text.setPrefRowCount(1);
 
+                // 크기 저장, 기본 크기 3.0
+                double[] width = new double[]{3.0};
+                // 기본값을 3으로 설정한다.
                 Slider slider = new Slider(1, 50, 3);
                 slider.setShowTickLabels(true);
                 slider.setShowTickMarks(true);
 
-                Label line_color = new Label("Line Color");
-                Label fill_color = new Label("Fill Color");
-                Label line_width = new Label("3.0");
+                // 레이블
+                Label lblLineColor = new Label("선 색");
+                Label lblLineWidth = new Label("3.0");
 
-                Button undo = new Button("Undo");
-                Button redo = new Button("Redo");
-                Button save = new Button("Save");
-                Button open = new Button("Open");
+                Label lblFillColor = new Label("채우기 색");
 
-                Button[] basicArr = {undo, redo, save, open};
+                // 조작 버튼
+                Button btnUndo = new Button("실행취소");
+                Button btnRedo = new Button("다시실행");
+                Button btnSave = new Button("저장");
+                Button btnOpen = new Button("열기");
+                // 공유 버튼
+                Button btnShare = new Button("공유");
 
+                // 조작 버튼들
+                Button[] basicArr;
+
+                // 게스트면 공유하기 버튼이 없다.
+                if (!Main.loginSession) {
+                    basicArr = new Button[]{btnUndo, btnRedo, btnSave, btnOpen};
+                } else {
+                    System.out.println("로그인 상태");
+                    // 로그인
+                    basicArr = new Button[]{btnUndo, btnRedo, btnSave, btnOpen, btnShare};
+                }
+
+                // 버튼 붙이기
                 for (Button btn : basicArr) {
                     btn.setMinWidth(90);
                     btn.setCursor(Cursor.HAND);
                     btn.setTextFill(Color.WHITE);
-                    btn.setStyle("-fx-background-color: #666;");
+                    btn.setStyle("-fx-background-color: #666666;");
                 }
-                save.setStyle("-fx-background-color: #80334d;");
-                open.setStyle("-fx-background-color: #80334d;");
 
-                VBox btns = new VBox(10);
-                btns.getChildren().addAll(drowbtn, rubberbtn, linebtn, rectbtn, circlebtn, elpslebtn,
-                        textbtn, text, line_color, cpLine, fill_color, cpFill, line_width, slider, undo, redo, open, save);
-                btns.setPadding(new Insets(5));
-                btns.setStyle("-fx-background-color: #999");
-                btns.setPrefWidth(100);
+                // 버튼 색 따로 지정
+                btnSave.setStyle("-fx-background-color: #80334d;");
+                btnOpen.setStyle("-fx-background-color: #80334d;");
+                btnShare.setStyle("-fx-background-color: #80334d;");
 
-                /* ----------Drow Canvas---------- */
+                // 버튼 목록
+                VBox buttons = new VBox(10);
+
+                if (!Main.loginSession) {
+                    buttons.getChildren().addAll(btnPen, btnEraser, btnLine, btnRect, btnCircle, btnEllipse,
+                            btnText, text, lblLineColor, cpLine, lblFillColor, cpFill, lblLineWidth, slider, btnUndo, btnRedo, btnOpen, btnSave);
+                } else {
+                    buttons.getChildren().addAll(btnPen, btnEraser, btnLine, btnRect, btnCircle, btnEllipse,
+                            btnText, text, lblLineColor, cpLine, lblFillColor, cpFill, lblLineWidth, slider, btnUndo, btnRedo, btnOpen, btnSave, btnShare);
+                }
+
+                buttons.setPadding(new Insets(5));
+                buttons.setStyle("-fx-background-color: #999");
+                buttons.setPrefWidth(100);
+
+                /* ----------Draw Canvas---------- */
                 Canvas canvas = new Canvas(1080, 790);
                 GraphicsContext gc;
                 gc = canvas.getGraphicsContext2D();
-                gc.setLineWidth(1);
+                // 기본 선 두께 지정
+                // gc.setLineWidth(1);
 
                 Line line = new Line();
                 Rectangle rect = new Rectangle();
-                Circle circ = new Circle();
-                Ellipse elps = new Ellipse();
+                Circle circle = new Circle();
+                Ellipse ellipse = new Ellipse();
 
+                // 하얀 백지로 초기화
+                gc.setFill(Color.WHITE);
+                gc.fillRect(0, 0, 1080, 790);
+
+                // 캔버스 내에서 마우스를 누를 때
                 canvas.setOnMousePressed(e -> {
-                    if (drowbtn.isSelected()) {
+
+                    // 마우스를 누를 때 기본 너비 지정
+                    gc.setLineWidth(width[0]);
+
+                    // 만약 펜 버튼이 선택되었다면
+                    if (btnPen.isSelected()) {
                         gc.setStroke(cpLine.getValue());
                         gc.beginPath();
                         gc.lineTo(e.getX(), e.getY());
-                    } else if (rubberbtn.isSelected()) {
-                        double lineWidth = gc.getLineWidth();
-                        gc.clearRect(e.getX() - lineWidth / 2, e.getY() - lineWidth / 2, lineWidth, lineWidth);
-                    } else if (linebtn.isSelected()) {
+                    } else if (btnEraser.isSelected()) {
+                        gc.setStroke(Color.WHITE);
+                        gc.setStroke(cpLine.getValue());
+                        gc.beginPath();
+                        gc.lineTo(e.getX(), e.getY());
+//                        double lineWidth = gc.getLineWidth();
+//                        gc.clearRect(e.getX() - lineWidth / 2, e.getY() - lineWidth / 2, lineWidth, lineWidth);
+                    } else if (btnLine.isSelected()) {
                         gc.setStroke(cpLine.getValue());
                         line.setStartX(e.getX());
                         line.setStartY(e.getY());
-                    } else if (rectbtn.isSelected()) {
+                    } else if (btnRect.isSelected()) {
                         gc.setStroke(cpLine.getValue());
                         gc.setFill(cpFill.getValue());
                         rect.setX(e.getX());
                         rect.setY(e.getY());
-                    } else if (circlebtn.isSelected()) {
+                    } else if (btnCircle.isSelected()) {
                         gc.setStroke(cpLine.getValue());
                         gc.setFill(cpFill.getValue());
-                        circ.setCenterX(e.getX());
-                        circ.setCenterY(e.getY());
-                    } else if (elpslebtn.isSelected()) {
+                        circle.setCenterX(e.getX());
+                        circle.setCenterY(e.getY());
+                    } else if (btnEllipse.isSelected()) {
                         gc.setStroke(cpLine.getValue());
                         gc.setFill(cpFill.getValue());
-                        elps.setCenterX(e.getX());
-                        elps.setCenterY(e.getY());
-                    } else if (textbtn.isSelected()) {
+                        ellipse.setCenterX(e.getX());
+                        ellipse.setCenterY(e.getY());
+                    } else if (btnText.isSelected()) {
+                        // 텍스트는 무조건 선 너비를 1로 하고, 폰트 크기를 지정.
                         gc.setLineWidth(1);
-                        gc.setFont(Font.font(slider.getValue()));
+                        gc.setFont(Font.font(width[0]));
+
                         gc.setStroke(cpLine.getValue());
                         gc.setFill(cpFill.getValue());
                         gc.fillText(text.getText(), e.getX(), e.getY());
@@ -172,31 +227,45 @@ public class Util {
                     }
                 });
 
+                // 마우스를 드래그 할 경우
                 canvas.setOnMouseDragged(e -> {
-                    if (drowbtn.isSelected()) {
+                    // 펜 일 경우
+                    if (btnPen.isSelected()) {
                         gc.lineTo(e.getX(), e.getY());
                         gc.stroke();
-                    } else if (rubberbtn.isSelected()) {
-                        double lineWidth = gc.getLineWidth();
-                        gc.clearRect(e.getX() - lineWidth / 2, e.getY() - lineWidth / 2, lineWidth, lineWidth);
+                    } else if (btnEraser.isSelected()) {
+                        gc.setStroke(Color.WHITE);
+                        gc.lineTo(e.getX(), e.getY());
+                        gc.stroke();
+//                        double lineWidth = gc.getLineWidth();
+//                        gc.clearRect(e.getX() - lineWidth / 2, e.getY() - lineWidth / 2, lineWidth, lineWidth);
                     }
                 });
 
+                // 마우스를 땔 경우
                 canvas.setOnMouseReleased(e -> {
-                    if (drowbtn.isSelected()) {
+                    Boolean flag = true;
+                    if (btnPen.isSelected()) {
+                        flag = false;
                         gc.lineTo(e.getX(), e.getY());
                         gc.stroke();
                         gc.closePath();
-                    } else if (rubberbtn.isSelected()) {
-                        double lineWidth = gc.getLineWidth();
-                        gc.clearRect(e.getX() - lineWidth / 2, e.getY() - lineWidth / 2, lineWidth, lineWidth);
-                    } else if (linebtn.isSelected()) {
+                    } else if (btnEraser.isSelected()) {
+                        flag = false;
+                        gc.setStroke(Color.WHITE);
+                        gc.lineTo(e.getX(), e.getY());
+                        gc.stroke();
+                        gc.closePath();
+
+//                        double lineWidth = gc.getLineWidth();
+//                        gc.clearRect(e.getX() - lineWidth / 2, e.getY() - lineWidth / 2, lineWidth, lineWidth);
+                    } else if (btnLine.isSelected()) {
+
                         line.setEndX(e.getX());
                         line.setEndY(e.getY());
                         gc.strokeLine(line.getStartX(), line.getStartY(), line.getEndX(), line.getEndY());
-
                         undoHistory.push(new Line(line.getStartX(), line.getStartY(), line.getEndX(), line.getEndY()));
-                    } else if (rectbtn.isSelected()) {
+                    } else if (btnRect.isSelected()) {
                         rect.setWidth(Math.abs((e.getX() - rect.getX())));
                         rect.setHeight(Math.abs((e.getY() - rect.getY())));
                         //rect.setX((rect.getX() > e.getX()) ? e.getX(): rect.getX());
@@ -212,69 +281,78 @@ public class Util {
                         gc.strokeRect(rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight());
 
                         undoHistory.push(new Rectangle(rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight()));
+                    } else if (btnCircle.isSelected()) {
+                        circle.setRadius((Math.abs(e.getX() - circle.getCenterX()) + Math.abs(e.getY() - circle.getCenterY())) / 2);
 
-                    } else if (circlebtn.isSelected()) {
-                        circ.setRadius((Math.abs(e.getX() - circ.getCenterX()) + Math.abs(e.getY() - circ.getCenterY())) / 2);
-
-                        if (circ.getCenterX() > e.getX()) {
-                            circ.setCenterX(e.getX());
+                        if (circle.getCenterX() > e.getX()) {
+                            circle.setCenterX(e.getX());
                         }
-                        if (circ.getCenterY() > e.getY()) {
-                            circ.setCenterY(e.getY());
-                        }
-
-                        gc.fillOval(circ.getCenterX(), circ.getCenterY(), circ.getRadius(), circ.getRadius());
-                        gc.strokeOval(circ.getCenterX(), circ.getCenterY(), circ.getRadius(), circ.getRadius());
-
-                        undoHistory.push(new Circle(circ.getCenterX(), circ.getCenterY(), circ.getRadius()));
-                    } else if (elpslebtn.isSelected()) {
-                        elps.setRadiusX(Math.abs(e.getX() - elps.getCenterX()));
-                        elps.setRadiusY(Math.abs(e.getY() - elps.getCenterY()));
-
-                        if (elps.getCenterX() > e.getX()) {
-                            elps.setCenterX(e.getX());
-                        }
-                        if (elps.getCenterY() > e.getY()) {
-                            elps.setCenterY(e.getY());
+                        if (circle.getCenterY() > e.getY()) {
+                            circle.setCenterY(e.getY());
                         }
 
-                        gc.strokeOval(elps.getCenterX(), elps.getCenterY(), elps.getRadiusX(), elps.getRadiusY());
-                        gc.fillOval(elps.getCenterX(), elps.getCenterY(), elps.getRadiusX(), elps.getRadiusY());
+                        gc.fillOval(circle.getCenterX(), circle.getCenterY(), circle.getRadius(), circle.getRadius());
+                        gc.strokeOval(circle.getCenterX(), circle.getCenterY(), circle.getRadius(), circle.getRadius());
 
-                        undoHistory.push(new Ellipse(elps.getCenterX(), elps.getCenterY(), elps.getRadiusX(), elps.getRadiusY()));
+                        undoHistory.push(new Circle(circle.getCenterX(), circle.getCenterY(), circle.getRadius()));
+                    } else if (btnEllipse.isSelected()) {
+                        ellipse.setRadiusX(Math.abs(e.getX() - ellipse.getCenterX()));
+                        ellipse.setRadiusY(Math.abs(e.getY() - ellipse.getCenterY()));
+
+                        if (ellipse.getCenterX() > e.getX()) {
+                            ellipse.setCenterX(e.getX());
+                        }
+                        if (ellipse.getCenterY() > e.getY()) {
+                            ellipse.setCenterY(e.getY());
+                        }
+
+                        gc.strokeOval(ellipse.getCenterX(), ellipse.getCenterY(), ellipse.getRadiusX(), ellipse.getRadiusY());
+                        gc.fillOval(ellipse.getCenterX(), ellipse.getCenterY(), ellipse.getRadiusX(), ellipse.getRadiusY());
+
+                        undoHistory.push(new Ellipse(ellipse.getCenterX(), ellipse.getCenterY(), ellipse.getRadiusX(), ellipse.getRadiusY()));
                     }
                     redoHistory.clear();
-                    Shape lastUndo = undoHistory.lastElement();
-                    lastUndo.setFill(gc.getFill());
-                    lastUndo.setStroke(gc.getStroke());
-                    lastUndo.setStrokeWidth(gc.getLineWidth());
+
+
+                    // 펜과 지우개같은 경우 undoHistory 가 쌓이지 않아 생기는 에러를 방지한다. + 펜과 지우개의 undo history 를 해야겠다...
+                    if (flag) {
+                        Shape lastUndo = undoHistory.lastElement();
+                        lastUndo.setFill(gc.getFill());
+                        lastUndo.setStroke(gc.getStroke());
+                        lastUndo.setStrokeWidth(gc.getLineWidth());
+                    }
                 });
+
                 // color picker
                 cpLine.setOnAction(e -> {
                     gc.setStroke(cpLine.getValue());
                 });
+
                 cpFill.setOnAction(e -> {
                     gc.setFill(cpFill.getValue());
                 });
 
-                // slider
+                // 크기 슬라이더
                 slider.valueProperty().addListener(e -> {
-                    double width = slider.getValue();
-                    if (textbtn.isSelected()) {
-                        gc.setLineWidth(1);
-                        gc.setFont(Font.font(slider.getValue()));
-                        line_width.setText(String.format("%.1f", width));
-                        return;
-                    }
-                    line_width.setText(String.format("%.1f", width));
-                    gc.setLineWidth(width);
+                    width[0] = slider.getValue();
+
+                    lblLineWidth.setText(String.format("%.1f", width[0]));
+                    System.out.printf("크기 %.1f\n", width[0]);
                 });
 
                 /*------- Undo & Redo ------*/
                 // Undo
-                undo.setOnAction(e -> {
+                btnUndo.setOnAction(e -> {
                     if (!undoHistory.isEmpty()) {
-                        gc.clearRect(0, 0, 1080, 790);
+                        // 캔버스 클리어
+//                        gc.clearRect(0, 0, 1080, 790);
+
+                        // 하얀 백지로 초기화
+                        Paint tempFill = gc.getFill();
+                        gc.setFill(Color.WHITE);
+                        gc.fillRect(0, 0, 1080, 790);
+                        gc.setFill(tempFill);
+
                         Shape removedShape = undoHistory.lastElement();
                         if (removedShape.getClass() == Line.class) {
                             Line tempLine = (Line) removedShape;
@@ -290,17 +368,17 @@ public class Util {
                             tempRect.setStrokeWidth(gc.getLineWidth());
                             redoHistory.push(new Rectangle(tempRect.getX(), tempRect.getY(), tempRect.getWidth(), tempRect.getHeight()));
                         } else if (removedShape.getClass() == Circle.class) {
-                            Circle tempCirc = (Circle) removedShape;
-                            tempCirc.setStrokeWidth(gc.getLineWidth());
-                            tempCirc.setFill(gc.getFill());
-                            tempCirc.setStroke(gc.getStroke());
-                            redoHistory.push(new Circle(tempCirc.getCenterX(), tempCirc.getCenterY(), tempCirc.getRadius()));
+                            Circle tempCircle = (Circle) removedShape;
+                            tempCircle.setStrokeWidth(gc.getLineWidth());
+                            tempCircle.setFill(gc.getFill());
+                            tempCircle.setStroke(gc.getStroke());
+                            redoHistory.push(new Circle(tempCircle.getCenterX(), tempCircle.getCenterY(), tempCircle.getRadius()));
                         } else if (removedShape.getClass() == Ellipse.class) {
-                            Ellipse tempElps = (Ellipse) removedShape;
-                            tempElps.setFill(gc.getFill());
-                            tempElps.setStroke(gc.getStroke());
-                            tempElps.setStrokeWidth(gc.getLineWidth());
-                            redoHistory.push(new Ellipse(tempElps.getCenterX(), tempElps.getCenterY(), tempElps.getRadiusX(), tempElps.getRadiusY()));
+                            Ellipse tempEllipse = (Ellipse) removedShape;
+                            tempEllipse.setFill(gc.getFill());
+                            tempEllipse.setStroke(gc.getStroke());
+                            tempEllipse.setStrokeWidth(gc.getLineWidth());
+                            redoHistory.push(new Ellipse(tempEllipse.getCenterX(), tempEllipse.getCenterY(), tempEllipse.getRadiusX(), tempEllipse.getRadiusY()));
                         }
                         Shape lastRedo = redoHistory.lastElement();
                         lastRedo.setFill(removedShape.getFill());
@@ -340,12 +418,12 @@ public class Util {
                             }
                         }
                     } else {
-                        System.out.println("there is no action to undo");
+                        System.out.println("실행취소 할 작업이 없습니다.");
                     }
                 });
 
                 // Redo
-                redo.setOnAction(e -> {
+                btnRedo.setOnAction(e -> {
                     if (!redoHistory.isEmpty()) {
                         Shape shape = redoHistory.lastElement();
                         gc.setLineWidth(shape.getStrokeWidth());
@@ -364,17 +442,17 @@ public class Util {
 
                             undoHistory.push(new Rectangle(tempRect.getX(), tempRect.getY(), tempRect.getWidth(), tempRect.getHeight()));
                         } else if (shape.getClass() == Circle.class) {
-                            Circle tempCirc = (Circle) shape;
-                            gc.fillOval(tempCirc.getCenterX(), tempCirc.getCenterY(), tempCirc.getRadius(), tempCirc.getRadius());
-                            gc.strokeOval(tempCirc.getCenterX(), tempCirc.getCenterY(), tempCirc.getRadius(), tempCirc.getRadius());
+                            Circle tempCircle = (Circle) shape;
+                            gc.fillOval(tempCircle.getCenterX(), tempCircle.getCenterY(), tempCircle.getRadius(), tempCircle.getRadius());
+                            gc.strokeOval(tempCircle.getCenterX(), tempCircle.getCenterY(), tempCircle.getRadius(), tempCircle.getRadius());
 
-                            undoHistory.push(new Circle(tempCirc.getCenterX(), tempCirc.getCenterY(), tempCirc.getRadius()));
+                            undoHistory.push(new Circle(tempCircle.getCenterX(), tempCircle.getCenterY(), tempCircle.getRadius()));
                         } else if (shape.getClass() == Ellipse.class) {
-                            Ellipse tempElps = (Ellipse) shape;
-                            gc.fillOval(tempElps.getCenterX(), tempElps.getCenterY(), tempElps.getRadiusX(), tempElps.getRadiusY());
-                            gc.strokeOval(tempElps.getCenterX(), tempElps.getCenterY(), tempElps.getRadiusX(), tempElps.getRadiusY());
+                            Ellipse tempEllipse = (Ellipse) shape;
+                            gc.fillOval(tempEllipse.getCenterX(), tempEllipse.getCenterY(), tempEllipse.getRadiusX(), tempEllipse.getRadiusY());
+                            gc.strokeOval(tempEllipse.getCenterX(), tempEllipse.getCenterY(), tempEllipse.getRadiusX(), tempEllipse.getRadiusY());
 
-                            undoHistory.push(new Ellipse(tempElps.getCenterX(), tempElps.getCenterY(), tempElps.getRadiusX(), tempElps.getRadiusY()));
+                            undoHistory.push(new Ellipse(tempEllipse.getCenterX(), tempEllipse.getCenterY(), tempEllipse.getRadiusX(), tempEllipse.getRadiusY()));
                         }
                         Shape lastUndo = undoHistory.lastElement();
                         lastUndo.setFill(gc.getFill());
@@ -382,34 +460,60 @@ public class Util {
                         lastUndo.setStrokeWidth(gc.getLineWidth());
 
                     } else {
-                        System.out.println("there is no action to redo");
+                        System.out.println("다시실행할 작업이 없습니다.");
                     }
                 });
 
 
                 /*------- Save & Open ------*/
                 // Open
-                open.setOnAction((e) -> {
+                btnOpen.setOnAction((e) -> {
                     FileChooser openFile = new FileChooser();
-                    openFile.setTitle("Open File");
-                    File file = openFile.showOpenDialog(primaryStage);
+                    openFile.setTitle("파일 열기");
+                    if (file != null) {
+                        File existDirectory = file.getParentFile();
+                        openFile.setInitialDirectory(existDirectory);
+                    }
+                    file = openFile.showOpenDialog(drawStage);
                     if (file != null) {
                         try {
                             InputStream io = new FileInputStream(file);
                             Image img = new Image(io);
                             gc.drawImage(img, 0, 0);
                         } catch (IOException ex) {
-                            System.out.println("Error!");
+                            System.out.println("오류가 발생했습니다: " + ex);
                         }
                     }
                 });
 
-                // Save
-                save.setOnAction((e) -> {
-                    FileChooser savefile = new FileChooser();
-                    savefile.setTitle("Save File");
 
-                    File file = savefile.showSaveDialog(primaryStage);
+                // Save
+                btnSave.setOnAction((e) -> {
+                    FileChooser saveFile = new FileChooser();
+                    // 기본 이미지 저장 확장자 설정
+                    FileChooser.ExtensionFilter extensionFilterJPG = new FileChooser.ExtensionFilter("JPG/JPEG files", "*.jpg", "*.jpeg");
+                    saveFile.getExtensionFilters().add(extensionFilterJPG);
+                    FileChooser.ExtensionFilter extensionFilterPNG = new FileChooser.ExtensionFilter("PNG files (*.png)", "*.png");
+                    saveFile.getExtensionFilters().add(extensionFilterPNG);
+
+
+                    // 파일 기본 이름
+                    saveFile.setInitialFileName("untitled");
+
+                    saveFile.setTitle("파일 저장");
+
+                    // 이전에 저장했던 파일의 폴더를 불러온다.
+                    if (file != null) {
+                        File existDirectory = file.getParentFile();
+                        saveFile.setInitialDirectory(existDirectory);
+                    }
+
+                    // 현재 폴더를 불러온다.
+//                    String currentPath = Paths.get(".").toAbsolutePath().normalize().toString();
+//                    saveFile.setInitialDirectory(new File(currentPath));
+
+                    file = saveFile.showSaveDialog(drawStage);
+
                     if (file != null) {
                         try {
                             WritableImage writableImage = new WritableImage(1080, 790);
@@ -417,7 +521,7 @@ public class Util {
                             RenderedImage renderedImage = SwingFXUtils.fromFXImage(writableImage, null);
                             ImageIO.write(renderedImage, "png", file);
                         } catch (IOException ex) {
-                            System.out.println("Error!");
+                            System.out.println("오류가 발생했습니다: " + ex);
                         }
                     }
 
@@ -425,16 +529,16 @@ public class Util {
 
                 /* ----------STAGE & SCENE---------- */
                 BorderPane pane = new BorderPane();
-                pane.setLeft(btns);
+                pane.setLeft(buttons);
                 pane.setCenter(canvas);
 
                 Scene scene = new Scene(pane, 1200, 800);
 
-                primaryStage.setTitle("Draw");
-                primaryStage.setScene(scene);
-                primaryStage.show();
+                drawStage.setTitle("Draw");
+                drawStage.setScene(scene);
+                drawStage.show();
 
-                primaryStage.setOnCloseRequest(e -> {
+                drawStage.setOnCloseRequest(e -> {
                     System.out.println("종료");
                     Main.isOpenDraw = false;
                 });

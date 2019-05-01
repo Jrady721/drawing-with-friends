@@ -2,14 +2,17 @@ package application;
 
 import application.controller.LoginController;
 import application.model.User;
+import application.util.Util;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 import java.io.IOException;
 
@@ -45,6 +48,20 @@ public class Main extends Application {
         initRootLayout();
 
         showLogin();
+
+        Main.primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+            @Override
+            public void handle(WindowEvent event) {
+                System.out.println("프로그램 종료");
+
+                if (Util.drawStage != null) {
+                    if (Util.drawStage.isShowing()) {
+                        Util.drawStage.close();
+                    }
+                }
+            }
+
+        });
     }
 
     // 상위 레이아웃을 초기화한다.
