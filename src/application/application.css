@@ -12,6 +12,10 @@
 #home .container { -fx-padding: 90 70 100 70; -fx-spacing: 10;}
 #home .button { -fx-min-height: 125; -fx-font-weight: bold; -fx-font-size: 20; }
 
+/* gallery */
+#gallery { -fx-padding: 0; -fx-spacing: 0; }
+#gallery .container { -fx-padding: 90 70 100 70; -fx-spacing: 10;}
+
 /* btn-logout */
 #btn-logout { -fx-cursor: hand; -fx-padding: 0 10 0 0; }
 #btn-logout:hover { -fx-text-fill: #52bda0; }
@@ -32,4 +36,6 @@
 .button:hover { -fx-background-color: #54baa9; }
 
 .button:pressed, .button:default:hover:pressed { -fx-background-color: #55a89e; }
+/*.button:selected { -fx-background-color: #55a89e; }*/
+/*.button:focused { -fx-background-color: #55a89e; }*/
 

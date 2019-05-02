@@ -19,7 +19,7 @@ import java.io.IOException;
 public class Main extends Application {
     public static Stage primaryStage;
     public static BorderPane rootLayout;
-    public static Boolean loginSession = false;
+    public static String loginId = "";
     public static Boolean isOpenDraw = false;
 
     // 회원에 대한 observable 리스트

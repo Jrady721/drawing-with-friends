@@ -1,9 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.VBox?>
 
-<VBox xmlns="http://javafx.com/javafx"
-      xmlns:fx="http://javafx.com/fxml"
-      fx:controller="application.controller.GalleryController"
-      prefHeight="400.0" prefWidth="600.0">
+<VBox id="gallery" prefHeight="800.0" prefWidth="1200.0" styleClass="main" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.controller.GalleryController">
+    <children>
+        <Label id="btn-logout" fx:id="btnLogout" alignment="CENTER_RIGHT" contentDisplay="RIGHT" maxWidth="1.7976931348623157E308" onMouseClicked="#Logout" text="로그아웃" />
+        <VBox fx:id="vBox" styleClass="container">
+            <ImageView fx:id="imageView" fitHeight="400.0" fitWidth="550.0" pickOnBounds="true" preserveRatio="true" />
+        </VBox>
+    </children>
 </VBox>

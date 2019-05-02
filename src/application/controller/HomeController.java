@@ -13,7 +13,7 @@ public class HomeController {
     @FXML
     public void Logout(MouseEvent mouseEvent) throws Exception {
         // 로그인 세션
-        Main.loginSession = false;
+        Main.loginId = "";
         System.out.println("로그아웃");
         Util.Alert("로그아웃", "로그아웃", "로그아웃 되었습니다!", Alert.AlertType.INFORMATION);
 

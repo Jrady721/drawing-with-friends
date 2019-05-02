@@ -1,6 +1,7 @@
 package application.util;
 
 import application.Main;
+import application.controller.HomeController;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
@@ -10,23 +11,24 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.*;
-import javafx.scene.text.Font;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 import javax.imageio.ImageIO;
+import javax.sql.RowSet;
 import java.awt.image.RenderedImage;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Array;
+import java.io.*;
+import java.nio.file.Paths;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Stack;
 
 public class Util {
@@ -85,22 +87,23 @@ public class Util {
 
                 // toggle group 에 버튼 붙이기 & 기본 설정
                 for (ToggleButton tool : toolsArr) {
-                    tool.setMinWidth(90);
+                    tool.setMinWidth(100);
                     tool.setToggleGroup(tools);
                     tool.setCursor(Cursor.HAND);
+                    tool.setStyle("-fx-background-color: #52bda0; -fx-text-fill: white;");
                 }
 
                 // 색 지정
                 ColorPicker cpLine = new ColorPicker(Color.BLACK);
 
-                // 기본값을 3으로 설정한다.
-                Slider slider = new Slider(1, 50, 3);
+                // 기본값을 1으로 설정한다.
+                Slider slider = new Slider(1, 30, 1);
                 slider.setShowTickLabels(true);
                 slider.setShowTickMarks(true);
 
                 // 레이블
                 Label lblLineColor = new Label("선 색");
-                Label lblLineWidth = new Label("3.0");
+                Label lblLineWidth = new Label("1.0");
 
                 // 조작 버튼
                 Button btnUndo = new Button("실행취소");
@@ -114,7 +117,7 @@ public class Util {
                 Button[] basicArr;
 
                 // 게스트면 공유하기 버튼이 없다.
-                if (!Main.loginSession) {
+                if (Main.loginId == "") {
                     basicArr = new Button[]{btnUndo, btnRedo, btnSave, btnOpen};
                 } else {
                     System.out.println("로그인 상태");
@@ -124,38 +127,38 @@ public class Util {
 
                 // 버튼 붙이기
                 for (Button btn : basicArr) {
-                    btn.setMinWidth(90);
+                    btn.setMinWidth(100);
                     btn.setCursor(Cursor.HAND);
                     btn.setTextFill(Color.WHITE);
                     btn.setStyle("-fx-background-color: #666666;");
                 }
 
                 // 버튼 색 따로 지정
-                btnSave.setStyle("-fx-background-color: #80334d;");
-                btnOpen.setStyle("-fx-background-color: #80334d;");
-                btnShare.setStyle("-fx-background-color: #80334d;");
+                btnSave.setStyle("-fx-background-color: #52bda0;");
+                btnOpen.setStyle("-fx-background-color: #52bda0;");
+                btnShare.setStyle("-fx-background-color: #52bda0;");
 
                 // 버튼 목록
                 VBox buttons = new VBox(10);
 
-                if (!Main.loginSession) {
+                if (Main.loginId == "") {
                     buttons.getChildren().addAll(btnPen, btnEraser, lblLineColor, cpLine, lblLineWidth, slider, btnUndo, btnRedo, btnOpen, btnSave);
                 } else {
                     buttons.getChildren().addAll(btnPen, btnEraser, lblLineColor, cpLine, lblLineWidth, slider, btnUndo, btnRedo, btnOpen, btnSave, btnShare);
                 }
 
                 buttons.setPadding(new Insets(5));
-                buttons.setStyle("-fx-background-color: #999999");
+                buttons.setStyle("-fx-background-color: #cccccc");
                 buttons.setPrefWidth(100);
 
                 /* ----------Draw Canvas---------- */
-                Canvas canvas = new Canvas(1080, 790);
+                Canvas canvas = new Canvas(1100, 800);
                 GraphicsContext gc;
                 gc = canvas.getGraphicsContext2D();
 
                 // 하얀 백지로 초기화
                 gc.setFill(Color.WHITE);
-                gc.fillRect(0, 0, 1080, 790);
+                gc.fillRect(0, 0, 1100, 800);
 
                 // 캔버스 내에서 마우스를 누를 때
                 canvas.setOnMousePressed(e -> {
@@ -228,6 +231,7 @@ public class Util {
                     lblLineWidth.setText(String.format("%.1f", slider.getValue()));
                     System.out.printf("크기 %.1f\n", slider.getValue());
                 });
+                slider.setStyle("-fx-cursor: hand;");
 
                 /*------- Undo & Redo ------*/
                 // Undo
@@ -236,7 +240,7 @@ public class Util {
                     if (!undoHistory.isEmpty()) {
                         // 캔버스 클리어 (WHITE)
                         gc.setFill(Color.WHITE);
-                        gc.fillRect(0, 0, 1080, 790);
+                        gc.fillRect(0, 0, 1100, 800);
 
                         // 가장 최근에 한 히스토리 꺼내기
                         int pop = chkUndoHistory.pop();
@@ -262,6 +266,10 @@ public class Util {
                             Double tempStrokeWidth = gc.getLineWidth();
 
                             Line tempLine = (Line) undoHistory.elementAt(undoHistory.size() - 1);
+                            tempLine.getStrokeDashArray().clear();
+//                            gc.setStroke(tempLine.getStroke());
+//                            gc.setLineWidth(tempLine.getStrokeWidth());
+
 
                             // 시작 지점으로 이동
                             gc.lineTo(tempLine.getStartX(), tempLine.getStartY());
@@ -272,17 +280,23 @@ public class Util {
                             // 다시 그리기
                             for (int index = 0; index < undoHistory.size(); index++) {
                                 // 만약 k와 chkHistory 의 데이터 중 같을 경우 닫아주고 beginPath 를 다시 열어준다.
+                                tempLine = (Line) undoHistory.elementAt(index);
+
                                 if (temp != chkUndoHistory.size()) {
                                     if (index == chkUndoHistory.elementAt(temp) + 1) {
+                                        System.out.printf("%d", index);
                                         gc.closePath();
+
                                         gc.beginPath();
+
                                         temp++;
                                     }
                                 }
 
-                                tempLine = (Line) undoHistory.elementAt(index);
+
                                 gc.setStroke(tempLine.getStroke());
                                 gc.setLineWidth(tempLine.getStrokeWidth());
+
                                 gc.lineTo(tempLine.getStartX(), tempLine.getStartY());
                                 gc.stroke();
                             }
@@ -292,6 +306,8 @@ public class Util {
                             // 다시 원래 색으로 돌리기
                             gc.setStroke(tempStroke);
                             gc.setLineWidth(tempStrokeWidth);
+
+                            // gc.clearRect(tempLine.getStartX(), tempLine.getStartY(), tempStrokeWidth, tempStrokeWidth);
                         }
                         System.out.printf("실행취소 %d, %d\n", end, pop);
                     } else {
@@ -363,9 +379,8 @@ public class Util {
                     }
                 });
 
-
                 /*------- Save & Open ------*/
-                // Open
+                // 열기 버튼
                 btnOpen.setOnAction((e) -> {
                     FileChooser openFile = new FileChooser();
                     openFile.setTitle("파일 열기");
@@ -385,8 +400,7 @@ public class Util {
                     }
                 });
 
-
-                // Save
+                // 저장 버튼
                 btnSave.setOnAction((e) -> {
                     FileChooser saveFile = new FileChooser();
                     // 기본 이미지 저장 확장자 설정
@@ -414,7 +428,7 @@ public class Util {
 
                     if (file != null) {
                         try {
-                            WritableImage writableImage = new WritableImage(1080, 790);
+                            WritableImage writableImage = new WritableImage(1100, 800);
                             canvas.snapshot(null, writableImage);
                             RenderedImage renderedImage = SwingFXUtils.fromFXImage(writableImage, null);
                             ImageIO.write(renderedImage, "png", file);
@@ -425,26 +439,57 @@ public class Util {
 
                 });
 
-                // btn Share
+                // 공유 버튼
                 btnShare.setOnAction(e -> {
-//                    System.out.println("share 버튼");
-//
-//                    Canvas test = history.lastElement();
-//                    GraphicsContext gc2 = test.getGraphicsContext2D();
-//                    gc = gc2;
+                    // 현재 폴더를 불러온다.
+//                    String tempName = new Date().toString() + new Random().toString();
+                    String currentPath = Paths.get(".").toAbsolutePath().normalize().toString();
+                    File desti = new File(currentPath + "\\images");
+                    if (!desti.exists()) {
+                        desti.mkdirs();
+                    }
+
+                    String tempName = String.valueOf(System.currentTimeMillis());
+
+                    file = new File(currentPath + "\\images\\" + tempName + ".png");
+
+                    try {
+                        WritableImage writableImage = new WritableImage(1100, 800);
+                        canvas.snapshot(null, writableImage);
+                        RenderedImage renderedImage = SwingFXUtils.fromFXImage(writableImage, null);
+                        ImageIO.write(renderedImage, "png", file);
+                    } catch (IOException ex) {
+                        System.out.println("오류가 발생했습니다: " + ex);
+                    }
+
+                    System.out.println("공유 버튼");
+                    try {
+                        Alert("알림", "갤러리 업로드", "갤리리에 업로드 후 창이 닫힙니다.", Alert.AlertType.CONFIRMATION);
+                        DBUtil.dbExecuteUpdate("INSERT INTO galleries (img, title, author, hit) VALUES('" + tempName + ".png', '" + tempName + "', '" + Main.loginId + "', '0')");
+                    } catch (SQLException ex) {
+                        ex.printStackTrace();
+                    } catch (ClassNotFoundException ex) {
+                        ex.printStackTrace();
+                    }
+
+                    // 종료
+                    drawStage.close();
+                    Main.isOpenDraw = false;
                 });
+
 
                 /* ----------STAGE & SCENE---------- */
                 BorderPane pane = new BorderPane();
                 pane.setLeft(buttons);
-                pane.setCenter(canvas);
+                pane.setRight(canvas);
 
                 Scene scene = new Scene(pane, 1200, 800);
-
+//                 scene.getStylesheets().add(Main.class.getResource("application.css").toExternalForm());
                 drawStage.setTitle("Draw");
                 drawStage.setScene(scene);
                 drawStage.show();
 
+                // 드로우 stage 가 종료 될 경우
                 drawStage.setOnCloseRequest(e -> {
                     System.out.println("종료");
                     Main.isOpenDraw = false;
@@ -452,6 +497,233 @@ public class Util {
             } else {
                 Alert("알림", "", "창이 이미 열려있습니다.", Alert.AlertType.INFORMATION);
             }
+        } else if (pageName.equals("Gallery")) {
+            BorderPane pane = new BorderPane();
+
+            ImageView imageView = new ImageView();
+//            Button btnExit = new Button();
+//            btnExit.setText("나가기");
+
+            Button btnNext = new Button();
+            btnNext.setText("다음으로");
+
+            Label info = new Label();
+
+            Button btnPrev = new Button();
+            btnPrev.setText("이전으로");
+
+            Button like = new Button();
+            like.setText("좋아요");
+            boolean[] chk = {true};
+
+            String currentPath = Paths.get(".").toAbsolutePath().normalize().toString();
+
+            final String[] title = {""};
+            final String[] author = {""};
+            RowSet[] rs = {(RowSet) DBUtil.dbExecuteQuery("SELECT * FROM galleries ORDER BY id DESC")};
+            Integer[] id = {0};
+            String[] img = {""};
+            if (rs[0].next()) {
+                id[0] = rs[0].getInt("ID");
+                img[0] = rs[0].getString("IMG");
+
+                int size = 0;
+                ResultSet rs2 = DBUtil.dbExecuteQuery("SELECT COUNT(*) FROM likes WHERE img = '" + img[0] + "'");
+                if (rs2 != null) {
+                    rs2.last();
+                    size = rs2.getInt("COUNT(*)");
+//                    size = rs2.getRow();
+                }
+
+                System.out.println("사이즈" + size);
+
+                title[0] = rs[0].getString("title");
+                author[0] = rs[0].getString("author");
+
+                info.setText("작품 코드: " + title[0] + " / 작성자: " + author[0] + " / 좋아요: " + size);
+
+                if (rs[0].getString("author").equals(Main.loginId)) {
+                    chk[0] = false;
+                } else {
+                    chk[0] = true;
+                }
+            }
+            Integer max = id[0];
+
+            String[] url = {currentPath + "\\images\\" + img[0]};
+            System.out.println(url[0]);
+
+            Image[] image = {null};
+            try {
+                image[0] = new Image(new FileInputStream(url[0]));
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+
+
+            HBox buttons = new HBox(10);
+            buttons.getChildren().addAll(btnPrev, info, btnNext, like);
+
+            int[] size2 = new int[1];
+            // 다음으로
+            btnNext.setOnAction(e -> {
+                if (id[0] != 1) {
+                    id[0] = id[0] - 1;
+                    System.out.println("다음");
+                    try {
+                        rs[0] = (RowSet) DBUtil.dbExecuteQuery("SELECT * FROM galleries WHERE id = '" + id[0].toString() + "'");
+                        if (rs[0].next()) {
+                            img[0] = rs[0].getString("IMG");
+
+                            int size = 0;
+                            ResultSet rs2 = DBUtil.dbExecuteQuery("SELECT COUNT(*) FROM likes WHERE img = '" + img[0] + "'");
+                            if (rs2 != null) {
+                                rs2.last();
+                                size = rs2.getInt("COUNT(*)");
+//                                size = rs2.getRow();
+                            }
+
+                            System.out.println("사이즈" + size);
+
+                            size2[0] = size;
+                            title[0] = rs[0].getString("title");
+                            author[0] = rs[0].getString("author");
+
+                            info.setText("작품 코드: " + title[0] + " / 작성자: " + author[0] + " / 좋아요: " + size2[0]);
+
+                            if (rs[0].getString("author").equals(Main.loginId)) {
+                                chk[0] = false;
+                            } else {
+                                chk[0] = true;
+                            }
+                        }
+                        image[0] = null;
+                        try {
+                            url[0] = currentPath + "\\images\\" + img[0];
+                            image[0] = new Image(new FileInputStream(url[0]));
+                        } catch (FileNotFoundException ex) {
+                            ex.printStackTrace();
+                        }
+                        imageView.setImage(image[0]);
+                    } catch (SQLException | ClassNotFoundException ex) {
+                        ex.printStackTrace();
+                    }
+                }
+
+            });
+            // 이전으로
+            btnPrev.setOnAction(e -> {
+                if (id[0] != max) {
+                    id[0] = id[0] + 1;
+                    System.out.println("다음");
+                    try {
+                        rs[0] = (RowSet) DBUtil.dbExecuteQuery("SELECT * FROM galleries WHERE id = '" + id[0].toString() + "'");
+                        if (rs[0].next()) {
+                            img[0] = rs[0].getString("IMG");
+
+                            int size = 0;
+                            ResultSet rs2 = DBUtil.dbExecuteQuery("SELECT COUNT(*) FROM likes WHERE img = '" + img[0] + "'");
+                            if (rs2 != null) {
+                                rs2.last();
+                                size = rs2.getInt("COUNT(*)");
+                            }
+                            System.out.println("사이즈" + size);
+
+                            size2[0] = size;
+
+                            title[0] = rs[0].getString("title");
+                            author[0] = rs[0].getString("author");
+
+                            info.setText("작품 코드: " + title[0] + " / 작성자: " + author[0] + " / 좋아요: " + size2[0]);
+
+                            if (rs[0].getString("author").equals(Main.loginId)) {
+                                chk[0] = false;
+                            } else {
+                                chk[0] = true;
+                            }
+                        }
+                        image[0] = null;
+                        try {
+                            url[0] = currentPath + "\\images\\" + img[0];
+                            image[0] = new Image(new FileInputStream(url[0]));
+                        } catch (FileNotFoundException ex) {
+                            ex.printStackTrace();
+                        }
+                        imageView.setImage(image[0]);
+                    } catch (SQLException | ClassNotFoundException ex) {
+                        ex.printStackTrace();
+                    }
+                }
+            });
+
+            // 좋아요
+            like.setOnAction(e -> {
+                if (chk[0]) {
+                    try {
+                        ResultSet rs3 = DBUtil.dbExecuteQuery("SELECT COUNT(*) FROM likes WHERE user = '" + Main.loginId + "' AND img = '" + img[0] + "'");
+                        int size = 0;
+                        if (rs3 != null) {
+                            rs3.last();
+                            size = rs3.getInt("COUNT(*)");
+                        }
+
+                        System.out.println("size: " + size);
+                        if (size > 0) {
+                            Alert("알림", "좋아요 실패", "이미 좋아요 했습니다.", Alert.AlertType.WARNING);
+                        } else {
+                            Alert("알림", "좋아요 성공", "좋아요 했습니다.", Alert.AlertType.INFORMATION);
+                            try {
+                                DBUtil.dbExecuteUpdate("INSERT INTO likes(user, img) VALUES('" + Main.loginId + "', '" + img[0] + "')");
+                            } catch (SQLException | ClassNotFoundException ex) {
+                                ex.printStackTrace();
+                            }
+                            title[0] = rs[0].getString("title");
+                            author[0] = rs[0].getString("author");
+
+                            int temp = size2[0] + 1;
+                            info.setText("작품 코드: " + title[0] + " / 작성자: " + author[0] + " / 좋아요: " + temp);
+                        }
+                    } catch (SQLException | ClassNotFoundException ex) {
+                        ex.printStackTrace();
+                    }
+                } else {
+                    Alert("알림", "좋아요 실패", "자신의 작품에는 좋아요를 할 수 없습니다.", Alert.AlertType.WARNING);
+
+                }
+            });
+
+            pane.setCenter(imageView);
+            pane.setTop(buttons);
+            imageView.setImage(image[0]);
+
+            Scene scene = new Scene(pane, 1200, 800);
+            Stage stage = new Stage();
+            stage.setTitle("Gallery");
+            stage.setScene(scene);
+            stage.show();
+
+//            btnExit.setOnAction(e -> {
+//                System.out.println("나가기");
+//                // 로그인 세션
+//                Main.loginId = "";
+//                System.out.println("로그아웃");
+//                Util.Alert("로그아웃", "로그아웃", "로그아웃 되었습니다!", Alert.AlertType.INFORMATION);
+//
+//                if (Util.drawStage != null) {
+//                    if (Util.drawStage.isShowing()) {
+//                        Util.Alert("알림", "Draw 창 종료", "로그아웃 하여 'Draw' 창이 종료됩니다.", Alert.AlertType.INFORMATION);
+//                        // 닫기
+//                        Util.drawStage.close();
+//                    }
+//                }
+//
+//                try {
+//                    stage.close();
+//                    Util.Move("Login");
+//                } catch (Exception ex) {
+//                    ex.printStackTrace();
+//                }
+//            });
         } else {
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(Main.class.getResource("view/" + pageName + ".fxml"));

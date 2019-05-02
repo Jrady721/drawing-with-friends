@@ -123,7 +123,7 @@ public class LoginController {
                 // 아이디와 패스워드 일치
                 if (password.equals(user.getPassword())) {
                     // 로그인 세션
-                    Main.loginSession = true;
+                    Main.loginId = userName;
 
                     // 알림 띄우기
                     Util.Alert("알림", "로그인 성공", userName + "님 환영합니다. 홈 화면으로 이동합니다.", Alert.AlertType.INFORMATION);
