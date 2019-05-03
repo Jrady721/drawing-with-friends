@@ -3,8 +3,7 @@
 <?import javafx.scene.layout.BorderPane?>
 
 
-<BorderPane xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="application.controller.RootLayoutController">
+<BorderPane xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.controller.RootLayoutController">
     <!--    <top>-->
     <!--        <MenuBar BorderPane.alignment="CENTER" styleClass="menu-bar">-->
     <!--            <menus>-->

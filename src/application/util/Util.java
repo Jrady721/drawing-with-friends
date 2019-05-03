@@ -1,7 +1,6 @@
 package application.util;
 
 import application.Main;
-import application.controller.HomeController;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
@@ -33,14 +32,13 @@ import java.util.Stack;
 
 public class Util {
     private static File file = null;
-
     public static Stage drawStage;
 
     // 알림창
-    public static void Alert(String title, String HeaderText, String ContentText, Alert.AlertType type) {
+    public static void Alert(String ContentText, Alert.AlertType type) {
         Alert alert = new Alert(type);
-        alert.setTitle(title);
-        alert.setHeaderText(HeaderText);
+//        alert.setTitle("알림");
+        alert.setHeaderText("");
         alert.setContentText(ContentText);
 
         Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
@@ -71,6 +69,7 @@ public class Util {
                 drawStage = new Stage();
                 final int[] undoChk = {-1};
                 final int[] redoChk = {-1};
+
                 Stack<Integer> chkUndoHistory = new Stack<>();
                 Stack<Integer> redoChkHistory = new Stack<>();
                 // 히스토리 저장
@@ -117,13 +116,25 @@ public class Util {
                 Button[] basicArr;
 
                 // 게스트면 공유하기 버튼이 없다.
-                if (Main.loginId == "") {
+                if (Main.sessionId.equals("")) {
                     basicArr = new Button[]{btnUndo, btnRedo, btnSave, btnOpen};
                 } else {
                     System.out.println("로그인 상태");
                     // 로그인
                     basicArr = new Button[]{btnUndo, btnRedo, btnSave, btnOpen, btnShare};
                 }
+
+                // 라디오 버튼 처럼 사용할 수 있게 만들어준다.
+                btnEraser.setOnAction(e -> {
+                    if (!btnEraser.isSelected()) {
+                        btnEraser.setSelected(true);
+                    }
+                });
+                btnPen.setOnAction(e -> {
+                    if (!btnPen.isSelected()) {
+                        btnPen.setSelected(true);
+                    }
+                });
 
                 // 버튼 붙이기
                 for (Button btn : basicArr) {
@@ -141,7 +152,7 @@ public class Util {
                 // 버튼 목록
                 VBox buttons = new VBox(10);
 
-                if (Main.loginId == "") {
+                if (Main.sessionId.equals("")) {
                     buttons.getChildren().addAll(btnPen, btnEraser, lblLineColor, cpLine, lblLineWidth, slider, btnUndo, btnRedo, btnOpen, btnSave);
                 } else {
                     buttons.getChildren().addAll(btnPen, btnEraser, lblLineColor, cpLine, lblLineWidth, slider, btnUndo, btnRedo, btnOpen, btnSave, btnShare);
@@ -221,9 +232,7 @@ public class Util {
                 });
 
                 // color picker
-                cpLine.setOnAction(e -> {
-                    gc.setStroke(cpLine.getValue());
-                });
+                cpLine.setOnAction(e -> gc.setStroke(cpLine.getValue()));
 
                 // 크기 슬라이더
                 slider.valueProperty().addListener(e -> {
@@ -263,13 +272,12 @@ public class Util {
                         if (undoHistory.size() > 0) {
                             // 시작하는 부분의 시점(end - 1 부분)의 데이터를 가져온다..
                             Paint tempStroke = gc.getStroke();
-                            Double tempStrokeWidth = gc.getLineWidth();
+                            double tempStrokeWidth = gc.getLineWidth();
 
                             Line tempLine = (Line) undoHistory.elementAt(undoHistory.size() - 1);
                             tempLine.getStrokeDashArray().clear();
 //                            gc.setStroke(tempLine.getStroke());
 //                            gc.setLineWidth(tempLine.getStrokeWidth());
-
 
                             // 시작 지점으로 이동
                             gc.lineTo(tempLine.getStartX(), tempLine.getStartY());
@@ -340,7 +348,7 @@ public class Util {
                         if (undoHistory.size() > 0) {
                             // 시작하는 부분의 시점(end - 1 부분)의 데이터를 가져온다..
                             Paint tempStroke = gc.getStroke();
-                            Double tempStrokeWidth = gc.getLineWidth();
+                            double tempStrokeWidth = gc.getLineWidth();
 
                             Line tempLine = (Line) undoHistory.elementAt(undoHistory.size() - 1);
 
@@ -436,7 +444,6 @@ public class Util {
                             System.out.println("오류가 발생했습니다: " + ex);
                         }
                     }
-
                 });
 
                 // 공유 버튼
@@ -444,9 +451,9 @@ public class Util {
                     // 현재 폴더를 불러온다.
 //                    String tempName = new Date().toString() + new Random().toString();
                     String currentPath = Paths.get(".").toAbsolutePath().normalize().toString();
-                    File desti = new File(currentPath + "\\images");
-                    if (!desti.exists()) {
-                        desti.mkdirs();
+                    File directory = new File(currentPath + "\\images");
+                    if (!directory.exists()) {
+                        directory.mkdirs();
                     }
 
                     String tempName = String.valueOf(System.currentTimeMillis());
@@ -464,19 +471,15 @@ public class Util {
 
                     System.out.println("공유 버튼");
                     try {
-                        Alert("알림", "갤러리 업로드", "갤리리에 업로드 후 창이 닫힙니다.", Alert.AlertType.CONFIRMATION);
-                        DBUtil.dbExecuteUpdate("INSERT INTO galleries (img, title, author, hit) VALUES('" + tempName + ".png', '" + tempName + "', '" + Main.loginId + "', '0')");
-                    } catch (SQLException ex) {
-                        ex.printStackTrace();
-                    } catch (ClassNotFoundException ex) {
+                        Alert("갤리리에 업로드 후 창이 닫힙니다.", Alert.AlertType.CONFIRMATION);
+                        DBUtil.dbExecuteUpdate("INSERT INTO galleries (img, title, author) VALUES('" + tempName + ".png', '" + tempName + "', '" + Main.sessionId + "')");
+                    } catch (SQLException | ClassNotFoundException ex) {
                         ex.printStackTrace();
                     }
-
                     // 종료
                     drawStage.close();
                     Main.isOpenDraw = false;
                 });
-
 
                 /* ----------STAGE & SCENE---------- */
                 BorderPane pane = new BorderPane();
@@ -484,6 +487,8 @@ public class Util {
                 pane.setRight(canvas);
 
                 Scene scene = new Scene(pane, 1200, 800);
+                scene.getStylesheets().add(Main.class.getResource("application.css").toExternalForm());
+
 //                 scene.getStylesheets().add(Main.class.getResource("application.css").toExternalForm());
                 drawStage.setTitle("Draw");
                 drawStage.setScene(scene);
@@ -495,14 +500,11 @@ public class Util {
                     Main.isOpenDraw = false;
                 });
             } else {
-                Alert("알림", "", "창이 이미 열려있습니다.", Alert.AlertType.INFORMATION);
+                Alert("창이 이미 열려있습니다.", Alert.AlertType.INFORMATION);
             }
         } else if (pageName.equals("Gallery")) {
             BorderPane pane = new BorderPane();
-
             ImageView imageView = new ImageView();
-//            Button btnExit = new Button();
-//            btnExit.setText("나가기");
 
             Button btnNext = new Button();
             btnNext.setText("다음으로");
@@ -532,7 +534,6 @@ public class Util {
                 if (rs2 != null) {
                     rs2.last();
                     size = rs2.getInt("COUNT(*)");
-//                    size = rs2.getRow();
                 }
 
                 System.out.println("사이즈" + size);
@@ -542,16 +543,11 @@ public class Util {
 
                 info.setText("작품 코드: " + title[0] + " / 작성자: " + author[0] + " / 좋아요: " + size);
 
-                if (rs[0].getString("author").equals(Main.loginId)) {
-                    chk[0] = false;
-                } else {
-                    chk[0] = true;
-                }
+                chk[0] = !rs[0].getString("author").equals(Main.sessionId);
             }
             Integer max = id[0];
 
             String[] url = {currentPath + "\\images\\" + img[0]};
-            System.out.println(url[0]);
 
             Image[] image = {null};
             try {
@@ -559,7 +555,6 @@ public class Util {
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             }
-
 
             HBox buttons = new HBox(10);
             buttons.getChildren().addAll(btnPrev, info, btnNext, like);
@@ -591,21 +586,13 @@ public class Util {
 
                             info.setText("작품 코드: " + title[0] + " / 작성자: " + author[0] + " / 좋아요: " + size2[0]);
 
-                            if (rs[0].getString("author").equals(Main.loginId)) {
-                                chk[0] = false;
-                            } else {
-                                chk[0] = true;
-                            }
+                            chk[0] = !rs[0].getString("author").equals(Main.sessionId);
                         }
                         image[0] = null;
-                        try {
-                            url[0] = currentPath + "\\images\\" + img[0];
-                            image[0] = new Image(new FileInputStream(url[0]));
-                        } catch (FileNotFoundException ex) {
-                            ex.printStackTrace();
-                        }
+                        url[0] = currentPath + "\\images\\" + img[0];
+                        image[0] = new Image(new FileInputStream(url[0]));
                         imageView.setImage(image[0]);
-                    } catch (SQLException | ClassNotFoundException ex) {
+                    } catch (SQLException | ClassNotFoundException | FileNotFoundException ex) {
                         ex.printStackTrace();
                     }
                 }
@@ -613,7 +600,7 @@ public class Util {
             });
             // 이전으로
             btnPrev.setOnAction(e -> {
-                if (id[0] != max) {
+                if (!id[0].equals(max)) {
                     id[0] = id[0] + 1;
                     System.out.println("다음");
                     try {
@@ -636,21 +623,13 @@ public class Util {
 
                             info.setText("작품 코드: " + title[0] + " / 작성자: " + author[0] + " / 좋아요: " + size2[0]);
 
-                            if (rs[0].getString("author").equals(Main.loginId)) {
-                                chk[0] = false;
-                            } else {
-                                chk[0] = true;
-                            }
+                            chk[0] = !rs[0].getString("author").equals(Main.sessionId);
                         }
                         image[0] = null;
-                        try {
-                            url[0] = currentPath + "\\images\\" + img[0];
-                            image[0] = new Image(new FileInputStream(url[0]));
-                        } catch (FileNotFoundException ex) {
-                            ex.printStackTrace();
-                        }
+                        url[0] = currentPath + "\\images\\" + img[0];
+                        image[0] = new Image(new FileInputStream(url[0]));
                         imageView.setImage(image[0]);
-                    } catch (SQLException | ClassNotFoundException ex) {
+                    } catch (SQLException | ClassNotFoundException | FileNotFoundException ex) {
                         ex.printStackTrace();
                     }
                 }
@@ -660,7 +639,7 @@ public class Util {
             like.setOnAction(e -> {
                 if (chk[0]) {
                     try {
-                        ResultSet rs3 = DBUtil.dbExecuteQuery("SELECT COUNT(*) FROM likes WHERE user = '" + Main.loginId + "' AND img = '" + img[0] + "'");
+                        ResultSet rs3 = DBUtil.dbExecuteQuery("SELECT COUNT(*) FROM likes WHERE user = '" + Main.sessionId + "' AND img = '" + img[0] + "'");
                         int size = 0;
                         if (rs3 != null) {
                             rs3.last();
@@ -669,11 +648,11 @@ public class Util {
 
                         System.out.println("size: " + size);
                         if (size > 0) {
-                            Alert("알림", "좋아요 실패", "이미 좋아요 했습니다.", Alert.AlertType.WARNING);
+                            Alert("이미 좋아요 했습니다.", Alert.AlertType.WARNING);
                         } else {
-                            Alert("알림", "좋아요 성공", "좋아요 했습니다.", Alert.AlertType.INFORMATION);
+                            Alert("좋아요 했습니다.", Alert.AlertType.INFORMATION);
                             try {
-                                DBUtil.dbExecuteUpdate("INSERT INTO likes(user, img) VALUES('" + Main.loginId + "', '" + img[0] + "')");
+                                DBUtil.dbExecuteUpdate("INSERT INTO likes(user, img) VALUES('" + Main.sessionId + "', '" + img[0] + "')");
                             } catch (SQLException | ClassNotFoundException ex) {
                                 ex.printStackTrace();
                             }
@@ -687,48 +666,26 @@ public class Util {
                         ex.printStackTrace();
                     }
                 } else {
-                    Alert("알림", "좋아요 실패", "자신의 작품에는 좋아요를 할 수 없습니다.", Alert.AlertType.WARNING);
+                    Alert("자신의 작품에는 좋아요를 할 수 없습니다.", Alert.AlertType.WARNING);
 
                 }
             });
-
             pane.setCenter(imageView);
             pane.setTop(buttons);
             imageView.setImage(image[0]);
 
             Scene scene = new Scene(pane, 1200, 800);
+            scene.getStylesheets().add(Main.class.getResource("application.css").toExternalForm());
+
             Stage stage = new Stage();
             stage.setTitle("Gallery");
             stage.setScene(scene);
             stage.show();
-
-//            btnExit.setOnAction(e -> {
-//                System.out.println("나가기");
-//                // 로그인 세션
-//                Main.loginId = "";
-//                System.out.println("로그아웃");
-//                Util.Alert("로그아웃", "로그아웃", "로그아웃 되었습니다!", Alert.AlertType.INFORMATION);
-//
-//                if (Util.drawStage != null) {
-//                    if (Util.drawStage.isShowing()) {
-//                        Util.Alert("알림", "Draw 창 종료", "로그아웃 하여 'Draw' 창이 종료됩니다.", Alert.AlertType.INFORMATION);
-//                        // 닫기
-//                        Util.drawStage.close();
-//                    }
-//                }
-//
-//                try {
-//                    stage.close();
-//                    Util.Move("Login");
-//                } catch (Exception ex) {
-//                    ex.printStackTrace();
-//                }
-//            });
         } else {
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(Main.class.getResource("view/" + pageName + ".fxml"));
 
-            VBox page = (VBox) loader.load();
+            VBox page = loader.load();
             Main.rootLayout.setCenter(page);
 
             Main.primaryStage.setTitle(pageName);

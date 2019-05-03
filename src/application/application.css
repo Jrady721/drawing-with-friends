@@ -1,11 +1,34 @@
 /* root */
-.root { -fx-background-color: white; -fx-font-family: "Malgun Gothic", sans-serif; -fx-min-width: 400; -fx-min-height: 450; }
+.root { -fx-background-color: white; -fx-font-family: "Malgun Gothic", sans-serif; }
 
-/*.root .menu-bar { -fx-max-width: 0; -fx-max-height: 0; }*/
-.main { -fx-padding: 40 70 60 70; -fx-spacing: 10; }
+/* app */
+/* label */
+.label { -fx-text-alignment: center; -fx-max-width: infinity; }
+.title { -fx-font-weight: bold; -fx-font-size: 18; -fx-padding: 0 0 20 0; -fx-alignment: center; }
 
-/* login */
+/* text field */
+.text-field { -fx-background-color: rgb(240, 240, 240); -fx-padding: 10; }
+
+/* password filed */
+.password-field { -fx-background-color: rgb(240, 240, 240); -fx-padding: 10; }
+
+/* button */
+.button { -fx-background-color: #54c6ad; -fx-text-fill: white; -fx-cursor: hand; -fx-max-width: infinity; -fx-padding: 10; -fx-spacing: 10; -fx-font-weight: bold; }
+.button:hover { -fx-background-color: #54baa9 !important; }
+
+.button:pressed, .button:default:hover:pressed { -fx-background-color: #55a89e !important; }
+
+.toggle-button:selected, .toggle-button:default { -fx-background-color: #43857f !important; }
+
+
+/* main */
+.main { -fx-padding: 40 70; -fx-spacing: 10; -fx-pref-width: 400; -fx-pref-height: 450; }
+
+/* login page */
 #login { }
+
+/* register page */
+#register { }
 
 /* home */
 #home { -fx-padding: 0; -fx-spacing: 0; }
@@ -19,23 +42,4 @@
 /* btn-logout */
 #btn-logout { -fx-cursor: hand; -fx-padding: 0 10 0 0; }
 #btn-logout:hover { -fx-text-fill: #52bda0; }
-
-
-/* label */
-.label { -fx-text-alignment: center; -fx-max-width: infinity; }
-.title { -fx-font-weight: bold; -fx-font-size: 18; -fx-padding: 0 0 20 0; -fx-alignment: center; }
-
-/* text field */
-.text-field { -fx-background-color: rgb(240, 240, 240); -fx-padding: 10; }
-
-/* password filed */
-.password-field { -fx-background-color: rgb(240, 240, 240); -fx-padding: 10; }
-
-/* button */
-.button { -fx-background-color: #54c6ad; -fx-text-fill: white; -fx-cursor: hand; -fx-max-width: infinity; -fx-padding: 10; -fx-spacing: 10; -fx-font-weight: bold; }
-.button:hover { -fx-background-color: #54baa9; }
-
-.button:pressed, .button:default:hover:pressed { -fx-background-color: #55a89e; }
-/*.button:selected { -fx-background-color: #55a89e; }*/
-/*.button:focused { -fx-background-color: #55a89e; }*/
 

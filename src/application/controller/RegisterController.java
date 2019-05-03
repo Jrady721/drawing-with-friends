@@ -11,6 +11,9 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 
 public class RegisterController {
+    // 메인 애플리케이션 참조
+    private Main main;
+
     @FXML
     TextField insertUsername;
     @FXML
@@ -18,10 +21,7 @@ public class RegisterController {
     @FXML
     PasswordField insertConfirmPassword;
 
-    // 메인 애플리케이션 참조
-    private Main main;
-
-    // 회원가입
+    @FXML
     public void Register(ActionEvent event) throws Exception {
         System.out.println("회원가입");
 
@@ -30,17 +30,17 @@ public class RegisterController {
         String confirmPassword = insertConfirmPassword.getText();
 
         if (username.equals("") || password.equals("") || confirmPassword.equals("")) {
-            Util.Alert("회원가입 실패", "입력 오류", "폼을 정확히 입력해주세요", Alert.AlertType.WARNING);
+            Util.Alert("폼을 정확히 입력해주세요", Alert.AlertType.WARNING);
         } else {
             if (!password.equals(confirmPassword)) {
-                Util.Alert("회원가입 실패", "입력 오류", "비밀번호와 비밀번호 확인이 틀립니다.", Alert.AlertType.WARNING);
+                Util.Alert("비밀번호와 비밀번호 확인이 틀립니다.", Alert.AlertType.WARNING);
             } else {
                 User user = UserDAO.searchUser(username);
                 if (user != null) {
-                    Util.Alert("회원가입 실패", "아이디 중복", "이미 사용중인 아이디입니다.", Alert.AlertType.WARNING);
+                    Util.Alert("이미 사용중인 아이디입니다.", Alert.AlertType.WARNING);
                 } else {
                     UserDAO.insertUser(username, password);
-                    Util.Alert("회원가입 성공", "회원가입에 성공했습니다", username + "님 환영합니다", Alert.AlertType.INFORMATION);
+                    Util.Alert(username + "님 환영합니다", Alert.AlertType.INFORMATION);
                     Util.Move("Login");
                 }
             }
@@ -48,8 +48,10 @@ public class RegisterController {
     }
 
     // 회원가입 페이지 -> 로그인 페이지 이동
+    @FXML
     public void moveLogin() throws Exception {
-        Util.Move("Login");
+//        Util.Move("Login");
+        main.view("Login");
     }
 
     /**
@@ -58,6 +60,7 @@ public class RegisterController {
      * @param main
      */
     public void setMain(Main main) {
+        System.out.println("회원가입 컨트롤러");
         this.main = main;
     }
 }
